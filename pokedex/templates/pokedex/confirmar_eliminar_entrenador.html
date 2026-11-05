@@ -1,0 +1,24 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+<div style="background: white; border-radius: 12px; padding: 2rem; max-width: 500px; margin: 3rem auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+    <h2 style="color: #dc2626; margin-bottom: 1rem;">¿Eliminar Entrenador?</h2>
+    <p style="color: #555; margin-bottom: 1.5rem;">
+        ¿Estás seguro de que deseas eliminar permanentemente a <strong>{{ entrenador.nombre }} {{ entrenador.apellido }}</strong> (Doc: {{ entrenador.documento }})?
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+            <button type="submit" class="btn" style="background: #dc2626; border: none; cursor: pointer; padding: 0.6rem 1.2rem; font-size: 1rem;">
+                Sí, Confirmar y Eliminar
+            </button>
+            <a href="{% url 'detalle_entrenador' entrenador.pk %}" class="btn" style="background: #6b7280; text-decoration: none; padding: 0.6rem 1.2rem;">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

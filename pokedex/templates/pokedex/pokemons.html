@@ -1,0 +1,151 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Lista de Pokémon{% endblock %}
+
+{% block content %}
+<div class="metrics">
+    <div class="metric-card">
+        <label>Total Pokémon</label>
+        <span>{{ total_pokemons }}</span>
+    </div>
+    <div class="metric-card">
+        <label>Entrenadores Registrados</label>
+        <span>{{ total_entrenadores }}</span>
+    </div>
+    <div class="metric-card">
+        <label>Gimnasios Activos</label>
+        <span>{{ total_gyms }}</span>
+    </div>
+</div>
+
+<!-- Barra de búsqueda sin JS -->
+<div style="background: white; border-radius: 12px; padding: 1.2rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+    <form method="GET" action="{% url 'home' %}" style="display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;">
+        <div style="flex: 2; min-width: 220px;">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}" 
+                placeholder="Buscar por nombre o habilidad..." 
+                class="form-input"
+            >
+        </div>
+
+        <div style="flex: 1; min-width: 160px;">
+            <select name="tipo" class="form-input">
+                <option value="">Todos los tipos</option>
+                {% for valor, etiqueta in tipos_disponibles %}
+                    <option value="{{ valor }}" {% if tipo_filtro == valor %}selected{% endif %}>
+                        {{ etiqueta }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn" style="background: var(--secondary); margin-top: 0; padding: 0.65rem 1.2rem; cursor: pointer; border: none;">
+                🔍 Buscar
+            </button>
+            {% if query or tipo_filtro %}
+                <a href="{% url 'home' %}" class="btn" style="background: #9ca3af; margin-top: 0; padding: 0.65rem 1rem; text-decoration: none;">
+                    Limpiar
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2>
+        {% if query or tipo_filtro %}
+            Resultados ({{ page_obj.paginator.count }})
+        {% else %}
+            Pokémon Registrados
+        {% endif %}
+    </h2>
+    <a href="{% url 'crear_pokemon' %}" class="btn" style="background: #16a34a; font-size: 0.95rem; padding: 0.5rem 1rem; text-decoration: none; margin-top: 0;">
+        + Registrar Pokémon
+    </a>
+</div>
+
+<!-- Grid de tarjetas de Pokémon -->
+<div class="grid">
+    {% for poke in page_obj %}
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span style="position: absolute; top: 12px; right: 12px; font-weight: bold; color: #ccc;">
+                    #{{ poke.id|stringformat:"03d" }}
+                </span>
+
+                {% if poke.imagen_url %}
+                    <img src="{{ poke.imagen_url }}" alt="{{ poke.nombre }}" style="width: 120px; height: 120px; object-fit: contain;">
+                {% elif poke.imagen %}
+                    <img src="{{ poke.imagen.url }}" alt="{{ poke.nombre }}" style="width: 120px; height: 120px; object-fit: contain;">
+                {% else %}
+                    <div style="width: 120px; height: 120px; line-height: 120px; margin: auto; background: #eee; border-radius: 50%;">Sin imagen</div>
+                {% endif %}
+
+                <h3 style="margin-top: 0.5rem; text-transform: capitalize;">{{ poke.nombre }}</h3>
+                <p style="margin: 0.5rem 0;">
+                    <span class="badge badge-{{ poke.tipo_elemento }}">{{ poke.tipo_elemento }}</span>
+                </p>
+                <p style="font-size: 0.85rem; color: #666;">Habilidad: <strong>{{ poke.habilidad }}</strong></p>
+                <p style="font-size: 0.85rem; color: #666;">Base Stat: <strong>{{ poke.estadistica }}</strong></p>
+
+                {% if poke.entrenador %}
+                    <p style="font-size: 0.8rem; color: var(--secondary); margin-top: 0.4rem;">
+                        Entrenador: <strong>{{ poke.entrenador.nombre }}</strong>
+                    </p>
+                {% else %}
+                    <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 0.4rem;">Salvaje (Sin entrenador)</p>
+                {% endif %}
+                
+                {% if poke.es_legendario %}
+                    <span style="color: #d97706; font-size: 0.8rem; font-weight: bold; display: block; margin-top: 0.3rem;">★ Legendario</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 0.4rem; justify-content: center; margin-top: 1rem; border-top: 1px solid #f3f4f6; padding-top: 0.8rem;">
+                <a href="{% url 'editar_pokemon' poke.pk %}" class="btn" style="background: #f59e0b; padding: 0.3rem 0.6rem; font-size: 0.8rem; text-decoration: none; margin-top: 0;">
+                    ✏ Editar
+                </a>
+                <a href="{% url 'eliminar_pokemon' poke.pk %}" class="btn" style="background: #dc2626; padding: 0.3rem 0.6rem; font-size: 0.8rem; text-decoration: none; margin-top: 0;">
+                    🗑 Eliminar
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div style="background: white; padding: 2rem; border-radius: 12px; grid-column: 1 / -1; text-align: center; color: #666;">
+            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No se encontraron Pokémon con los filtros seleccionados.</p>
+            <a href="{% url 'home' %}" style="color: var(--secondary); font-weight: 600; text-decoration: none;">Ver todos los Pokémon</a>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación numerada con soporte para filtros -->
+{% if page_obj.has_other_pages %}
+    <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin: 2.5rem 0; flex-wrap: wrap;">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}" class="pagination-btn">
+                « Primera
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}" class="pagination-btn">
+                ‹ Anterior
+            </a>
+        {% endif %}
+
+        <span style="font-weight: 600; color: #4b5563; padding: 0.5rem 0.8rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}" class="pagination-btn">
+                Siguiente ›
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}" class="pagination-btn">
+                Última »
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

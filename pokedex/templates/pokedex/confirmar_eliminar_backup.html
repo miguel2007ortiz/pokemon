@@ -1,0 +1,24 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+<div style="background: white; border-radius: 12px; padding: 2rem; max-width: 480px; margin: 3rem auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+    <h2 style="color: #dc2626; margin-bottom: 1rem;">¿Eliminar Caja de Backup?</h2>
+    <p style="color: #555; margin-bottom: 1.5rem;">
+        ¿Estás seguro de que deseas eliminar este registro de almacenamiento de <strong>{{ backup.entrenador.nombre }} {{ backup.entrenador.apellido }}</strong> (Región: {{ backup.region }})?
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+            <button type="submit" class="btn" style="background: #dc2626; border: none; cursor: pointer; padding: 0.6rem 1.2rem; font-size: 1rem; margin-top: 0;">
+                Sí, Confirmar y Eliminar
+            </button>
+            <a href="{% url 'lista_backups' %}" class="btn" style="background: #6b7280; text-decoration: none; padding: 0.6rem 1.2rem; margin-top: 0;">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

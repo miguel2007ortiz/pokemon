@@ -1,0 +1,85 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Cajas PC / Backups{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <h2>
+        {% if query %}
+            Resultados de Búsqueda ({{ backups|length }})
+        {% else %}
+            Cajas PC y Almacenamiento ({{ backups|length }})
+        {% endif %}
+    </h2>
+    <a href="{% url 'crear_backup' %}" class="btn" style="background: #16a34a; font-size: 0.95rem; padding: 0.5rem 1rem; text-decoration: none; margin-top: 0;">
+        + Nueva Caja PC
+    </a>
+</div>
+
+<!-- Filtro de Búsqueda sin JavaScript -->
+<div style="background: white; border-radius: 12px; padding: 1.2rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+    <form method="GET" action="{% url 'lista_backups' %}" style="display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;">
+        <div style="flex: 1; min-width: 250px;">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}" 
+                placeholder="Buscar por entrenador, profesor, región o ítems..." 
+                class="form-input"
+            >
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn" style="background: var(--secondary); margin-top: 0; padding: 0.65rem 1.2rem; cursor: pointer; border: none;">
+                🔍 Buscar
+            </button>
+            {% if query %}
+                <a href="{% url 'lista_backups' %}" class="btn" style="background: #9ca3af; margin-top: 0; padding: 0.65rem 1rem; text-decoration: none;">
+                    Limpiar
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Grid de Cajas de Almacenamiento -->
+<div class="grid">
+    {% for backup in backups %}
+        <div class="card" style="text-align: left; display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid var(--secondary);">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: var(--secondary); font-size: 1.15rem;">{{ backup.entrenador.nombre }} {{ backup.entrenador.apellido }}</h3>
+                    <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 10px; font-weight: bold;">
+                        {{ backup.region }}
+                    </span>
+                </div>
+
+                <hr style="margin: 0.7rem 0; border: none; border-top: 1px solid #eee;">
+
+                <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                    <strong>Pokémon en caja:</strong> 📦 {{ backup.numero_pokemones_guardados }} ejemplares
+                </p>
+                <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                    <strong>Profesor supervisor:</strong> 🔬 {{ backup.profesor_que_los_cuida }}
+                </p>
+                <p style="font-size: 0.85rem; color: #555; margin-bottom: 0.35rem;">
+                    <strong>Ítems guardados:</strong> {{ backup.items|default:"Sin objetos guardados" }}
+                </p>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display: flex; gap: 0.4rem; justify-content: center; margin-top: 1rem; border-top: 1px solid #f3f4f6; padding-top: 0.8rem;">
+                <a href="{% url 'editar_backup' backup.pk %}" class="btn" style="background: #f59e0b; padding: 0.3rem 0.6rem; font-size: 0.8rem; text-decoration: none; margin-top: 0;">
+                    ✏ Editar
+                </a>
+                <a href="{% url 'eliminar_backup' backup.pk %}" class="btn" style="background: #dc2626; padding: 0.3rem 0.6rem; font-size: 0.8rem; text-decoration: none; margin-top: 0;">
+                    🗑 Eliminar
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div style="background: white; padding: 2rem; border-radius: 12px; grid-column: 1 / -1; text-align: center; color: #666;">
+            No se encontraron registros de Backup o almacenamiento.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

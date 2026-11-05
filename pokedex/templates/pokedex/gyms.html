@@ -1,0 +1,102 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Gimnasios Pokémon{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <h2>
+        {% if query or region_filtro %}
+            Gimnasios Encontrados ({{ gyms|length }})
+        {% else %}
+            Gimnasios Oficiales ({{ gyms|length }})
+        {% endif %}
+    </h2>
+    <a href="{% url 'crear_gym' %}" class="btn" style="background: #16a34a; font-size: 0.95rem; padding: 0.5rem 1rem; text-decoration: none; margin-top: 0;">
+        + Registrar Gimnasio
+    </a>
+</div>
+
+<!-- Filtros de búsqueda (Sin JavaScript) -->
+<div style="background: white; border-radius: 12px; padding: 1.2rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+    <form method="GET" action="{% url 'lista_gyms' %}" style="display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;">
+        <div style="flex: 2; min-width: 220px;">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}" 
+                placeholder="Buscar por ciudad, líder o medalla..." 
+                class="form-input"
+            >
+        </div>
+        <div style="flex: 1; min-width: 160px;">
+            <select name="region" class="form-input">
+                <option value="">Todas las regiones</option>
+                {% for reg in regiones %}
+                    <option value="{{ reg }}" {% if region_filtro == reg %}selected{% endif %}>
+                        Región {{ reg }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn" style="background: var(--secondary); margin-top: 0; padding: 0.65rem 1.2rem; cursor: pointer; border: none;">
+                🔍 Buscar
+            </button>
+            {% if query or region_filtro %}
+                <a href="{% url 'lista_gyms' %}" class="btn" style="background: #9ca3af; margin-top: 0; padding: 0.65rem 1rem; text-decoration: none;">
+                    Limpiar
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Grid de Tarjetas de Gimnasios -->
+<div class="grid">
+    {% for gym in gyms %}
+        <div class="card" style="text-align: left; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: var(--secondary);">{{ gym.ciudad }}</h3>
+                    <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 10px; font-weight: bold;">
+                        {{ gym.region }}
+                    </span>
+                </div>
+
+                <hr style="margin: 0.7rem 0; border: none; border-top: 1px solid #eee;">
+
+                <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                    <strong>Líder:</strong> {{ gym.lider_de_gimnasio }}
+                </p>
+                <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                    <strong>Tipo:</strong> <span class="badge badge-{{ gym.tipo_elemento }}">{{ gym.tipo_elemento }}</span>
+                </p>
+                <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                    <strong>Recompensa:</strong> 🎖 {{ gym.medalla }}
+                </p>
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.35rem;">
+                    <strong>Contacto:</strong> 📞 {{ gym.telefono }}
+                </p>
+                {% if gym.entrenador %}
+                    <p style="font-size: 0.85rem; color: #777;">
+                        <strong>Entrenador registrado:</strong> {{ gym.entrenador.nombre }} {{ gym.entrenador.apellido }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 0.4rem; justify-content: center; margin-top: 1rem; border-top: 1px solid #f3f4f6; padding-top: 0.8rem;">
+                <a href="{% url 'editar_gym' gym.pk %}" class="btn" style="background: #f59e0b; padding: 0.3rem 0.6rem; font-size: 0.8rem; text-decoration: none; margin-top: 0;">
+                    ✏ Editar
+                </a>
+                <a href="{% url 'eliminar_gym' gym.pk %}" class="btn" style="background: #dc2626; padding: 0.3rem 0.6rem; font-size: 0.8rem; text-decoration: none; margin-top: 0;">
+                    🗑 Eliminar
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div style="background: white; padding: 2rem; border-radius: 12px; grid-column: 1 / -1; text-align: center; color: #666;">
+            No se encontraron gimnasios registrados.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

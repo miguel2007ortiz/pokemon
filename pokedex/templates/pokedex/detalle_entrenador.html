@@ -1,0 +1,115 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Perfil de {{ entrenador.nombre }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'lista_entrenadores' %}" style="display: inline-block; margin-bottom: 1.5rem; color: var(--secondary); font-weight: 600; text-decoration: none;">
+    ← Volver a Entrenadores
+</a>
+
+<!-- Tarjeta de Perfil Principal -->
+<div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 2.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="color: var(--text); font-size: 1.8rem;">{{ entrenador.nombre }} {{ entrenador.apellido }}</h1>
+            <p style="color: #666; margin-top: 0.3rem;">Identificación oficial: <strong>{{ entrenador.documento }}</strong></p>
+        </div>
+        
+        <!-- Acciones y Estatus alineados -->
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.8rem;">
+            <div>
+                {% if entrenador.clasifico %}
+                    <span style="font-size: 0.9rem; background: #dcfce7; color: #15803d; padding: 6px 14px; border-radius: 20px; font-weight: bold;">
+                        ✓ Clasificado a la Liga
+                    </span>
+                {% else %}
+                    <span style="font-size: 0.9rem; background: #fef3c7; color: #b45309; padding: 6px 14px; border-radius: 20px; font-weight: bold;">
+                        ⏳ En recorrido de gimnasios
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Botones de Acción (CRUD) -->
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'editar_entrenador' entrenador.pk %}" class="btn" style="background: #f59e0b; padding: 0.35rem 0.8rem; font-size: 0.85rem; text-decoration: none;">
+                    ✏ Editar
+                </a>
+                <a href="{% url 'eliminar_entrenador' entrenador.pk %}" class="btn" style="background: #dc2626; padding: 0.35rem 0.8rem; font-size: 0.85rem; text-decoration: none;">
+                    🗑 Eliminar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #f0f0f0;">
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+        <div>
+            <span style="display: block; font-size: 0.85rem; color: #888;">Pueblo de Origen</span>
+            <strong style="font-size: 1.05rem;">{{ entrenador.pueblo }}</strong>
+        </div>
+        <div>
+            <span style="display: block; font-size: 0.85rem; color: #888;">Liga Competitiva</span>
+            <strong style="font-size: 1.05rem;">{{ entrenador.liga }}</strong>
+        </div>
+        <div>
+            <span style="display: block; font-size: 0.85rem; color: #888;">Profesor Asignado</span>
+            <strong style="font-size: 1.05rem;">{{ entrenador.profesor_asignado }}</strong>
+        </div>
+        <div>
+            <span style="display: block; font-size: 0.85rem; color: #888;">Medallas Oficiales</span>
+            <strong style="font-size: 1.05rem; color: #d97706;">🏅 {{ entrenador.medallas }} ganadas</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Sección del Sistema de Almacenamiento / Backup (Diagrama) -->
+<h3 style="margin-bottom: 1rem; color: var(--text);">Sistema de Almacenamiento y Backup (Caja PC)</h3>
+<div class="grid" style="margin-bottom: 2.5rem;">
+    {% for backup in entrenador.backups.all %}
+        <div class="card" style="text-align: left; border-left: 4px solid var(--secondary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h4 style="color: var(--secondary);">Almacén #{{ forloop.counter }}</h4>
+                <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 10px; font-weight: bold;">
+                    {{ backup.region }}
+                </span>
+            </div>
+            <hr style="margin: 0.5rem 0 0.8rem 0; border: none; border-top: 1px solid #eee;">
+            <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                <strong>Pokémon guardados:</strong> {{ backup.numero_pokemones_guardados }} ejemplares
+            </p>
+            <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                <strong>Profesor a cargo:</strong> {{ backup.profesor_que_los_cuida }}
+            </p>
+            <p style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+                <strong>Ítems en resguardo:</strong> {{ backup.items|default:"Sin objetos guardados" }}
+            </p>
+        </div>
+    {% empty %}
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; grid-column: 1 / -1; color: #777;">
+            Este entrenador aún no tiene cajas de backup registradas en su PC.
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Pokémon en equipo del Entrenador -->
+<h3 style="margin-bottom: 1rem; color: var(--text);">Pokémon en Equipo</h3>
+<div class="grid">
+    {% for poke in entrenador.pokemones.all %}
+        <div class="card">
+            {% if poke.imagen_url %}
+                <img src="{{ poke.imagen_url }}" alt="{{ poke.nombre }}" style="width: 100px; height: 100px; object-fit: contain;">
+            {% elif poke.imagen %}
+                <img src="{{ poke.imagen.url }}" alt="{{ poke.nombre }}" style="width: 100px; height: 100px; object-fit: contain;">
+            {% endif %}
+            <h4 style="margin-top: 0.5rem; text-transform: capitalize;">{{ poke.nombre }}</h4>
+            <span class="badge badge-{{ poke.tipo_elemento }}" style="margin: 0.3rem 0;">{{ poke.tipo_elemento }}</span>
+            <p style="font-size: 0.85rem; color: #666;">Stat: {{ poke.estadistica }}</p>
+        </div>
+    {% empty %}
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; grid-column: 1 / -1; color: #777;">
+            No tiene Pokémon asignados directamente en su equipo activo. Puedes vincular Pokémon a este entrenador desde el <a href="/admin/pokedex/pokemon/" target="_blank" style="color: var(--secondary);">Panel Admin</a>.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

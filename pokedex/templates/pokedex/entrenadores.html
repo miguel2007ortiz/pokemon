@@ -1,0 +1,96 @@
+{% extends 'pokedex/base.html' %}
+
+{% block title %}Entrenadores Oficiales{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <h2>
+        {% if query or filtro_clasificado %}
+            Resultados de Búsqueda ({{ entrenadores|length }})
+        {% else %}
+            Entrenadores Registrados ({{ entrenadores|length }})
+        {% endif %}
+    </h2>
+    <a href="{% url 'crear_entrenador' %}" class="btn" style="background: #16a34a; font-size: 0.95rem; padding: 0.5rem 1rem; text-decoration: none; margin-top: 0;">
+        + Registrar Entrenador
+    </a>
+</div>
+
+<!-- Formulario de búsqueda nativo por GET (Sin JavaScript) -->
+<div style="background: white; border-radius: 12px; padding: 1.2rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+    <form method="GET" action="{% url 'lista_entrenadores' %}" style="display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;">
+        
+        <!-- Campo de texto -->
+        <div style="flex: 2; min-width: 220px;">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}" 
+                placeholder="Buscar por nombre, apellido, documento o pueblo..." 
+                class="form-input"
+            >
+        </div>
+
+        <!-- Filtro por estatus de clasificación -->
+        <div style="flex: 1; min-width: 160px;">
+            <select name="clasifico" class="form-input">
+                <option value="">Todos los estados</option>
+                <option value="si" {% if filtro_clasificado == 'si' %}selected{% endif %}>Clasificados</option>
+                <option value="no" {% if filtro_clasificado == 'no' %}selected{% endif %}>En progreso</option>
+            </select>
+        </div>
+
+        <!-- Botones de Enviar y Limpiar -->
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn" style="background: var(--secondary); margin-top: 0; padding: 0.65rem 1.2rem; cursor: pointer; border: none;">
+                🔍 Buscar
+            </button>
+            
+            {% if query or filtro_clasificado %}
+                <a href="{% url 'lista_entrenadores' %}" class="btn" style="background: #9ca3af; margin-top: 0; padding: 0.65rem 1rem; text-decoration: none;">
+                    Limpiar
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Listado de tarjetas de entrenadores -->
+<div class="grid">
+    {% for ent in entrenadores %}
+        <div class="card" style="text-align: left; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="color: var(--secondary); font-size: 1.15rem;">{{ ent.nombre }} {{ ent.apellido }}</h3>
+                    {% if ent.clasifico %}
+                        <span style="font-size: 0.75rem; background: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 12px; font-weight: bold;">Clasificado</span>
+                    {% else %}
+                        <span style="font-size: 0.75rem; background: #f3f4f6; color: #6b7280; padding: 3px 8px; border-radius: 12px;">En progreso</span>
+                    {% endif %}
+                </div>
+                
+                <hr style="margin: 0.7rem 0; border: none; border-top: 1px solid #eee;">
+                
+                <p style="font-size: 0.88rem; margin-bottom: 0.35rem; color: #555;"><strong>Documento:</strong> {{ ent.documento }}</p>
+                <p style="font-size: 0.88rem; margin-bottom: 0.35rem; color: #555;"><strong>Pueblo natal:</strong> {{ ent.pueblo }}</p>
+                <p style="font-size: 0.88rem; margin-bottom: 0.35rem; color: #555;"><strong>Liga:</strong> {{ ent.liga }}</p>
+                <p style="font-size: 0.88rem; margin-bottom: 0.35rem; color: #555;"><strong>Tutor:</strong> {{ ent.profesor_asignado }}</p>
+                
+                <div style="margin-top: 0.8rem; background: #fafafa; padding: 0.5rem; border-radius: 6px; border: 1px solid #f0f0f0;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #444;">Medallas obtenidas:</span>
+                    <span style="color: #d97706; font-weight: bold;">🏅 {{ ent.medallas }} / 8</span>
+                </div>
+            </div>
+
+            <a href="{% url 'detalle_entrenador' ent.pk %}" class="btn" style="margin-top: 1.2rem; text-align: center; border-radius: 6px; text-decoration: none;">
+                Ver Perfil y PC
+            </a>
+        </div>
+    {% empty %}
+        <div style="background: white; padding: 2rem; border-radius: 12px; grid-column: 1 / -1; text-align: center; color: #666;">
+            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No se encontraron entrenadores que coincidan con la búsqueda.</p>
+            <a href="{% url 'lista_entrenadores' %}" style="color: var(--secondary); font-weight: 600; text-decoration: none;">Ver todos los entrenadores</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
